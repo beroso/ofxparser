@@ -45,8 +45,10 @@ class Parser
         $ofxSgml = trim(substr($ofxContent, $sgmlStart));
 
         $ofxXml = $this->convertSgmlToXml($ofxSgml);
-
-        $xml = $this->xmlLoadString($ofxXml);
+        
+        $validChars = $this->stripInvalidXml($ofxXml);
+        
+        $xml = $this->xmlLoadString($validChars);
 
         return new Ofx($xml);
     }
@@ -125,5 +127,40 @@ class Parser
         }
 
         return trim($xml);
+    }
+    
+    /**
+     * Removes invalid XML
+     *
+     * @access public
+     * @param string $value
+     * @return string
+     */
+    function stripInvalidXml($value)
+    {
+        $invalidChars = [ "<", ">", "\"", "'", "&" ];
+        $xmlTags = explode("<",$value);
+        $xml = "";
+        $j = count($xmlTags);
+        for ($i = 0; $i < $j; $i++){
+            $xmlTag = $xmlTags[$i];
+            if (strlen($xmlTag)>0){
+                $xmlTag_ = explode(">", $xmlTag);
+                $xml .= "<".$xmlTag_[0].">";
+                foreach (str_split($xmlTag_[1]) as $character){
+                    $valid = true;
+                    foreach ($invalidChars as $invalidChar) {
+                        if ($character == $invalidChar){
+                            $valid = false;
+                            break;
+                        }
+                    }
+                    if ($valid){
+                        $xml .= $character;
+                    }
+                }
+            } 
+        }
+        return $xml;
     }
 }
