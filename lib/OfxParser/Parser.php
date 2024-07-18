@@ -79,6 +79,8 @@ class Parser
     {
         libxml_clear_errors();
         libxml_use_internal_errors(true);
+        // Replace unescaped ampersands. @see https://www.php.net/manual/en/simplexml.examples-errors.php#115708
+        $xmlString = preg_replace('/&(?!;{6})/', '&amp;', $xmlString);
         $xml = simplexml_load_string($xmlString);
 
         if ($errors = libxml_get_errors()) {
