@@ -3,11 +3,11 @@
 namespace OfxParserTest;
 
 use OfxParser\Parser;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * @covers OfxParser\Parser
- */
-class ParserTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(Parser::class)]
+class ParserTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreditCardStatementTransactionsAreLoaded()
     {
@@ -54,7 +54,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    public function closeUnclosedXmlTagsProvider()
+    public static function closeUnclosedXmlTagsProvider()
     {
         return [
             ['<SOMETHING>', '<SOMETHING>'],
@@ -68,10 +68,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider closeUnclosedXmlTagsProvider
      * @param $expected
      * @param $input
      */
+    #[DataProvider('closeUnclosedXmlTagsProvider')]
     public function testCloseUnclosedXmlTags($expected, $input)
     {
         $method = new \ReflectionMethod(Parser::class, 'closeUnclosedXmlTags');
@@ -82,7 +82,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         self::assertEquals($expected, $method->invoke($parser, $input));
     }
 
-    public function convertSgmlToXmlProvider()
+    public static function convertSgmlToXmlProvider()
     {
         return [
             [<<<HERE
@@ -117,9 +117,7 @@ HERE
         ];
     }
 
-    /**
-     * @dataProvider convertSgmlToXmlProvider
-     */
+    #[DataProvider('convertSgmlToXmlProvider')]
     public function testConvertSgmlToXml($sgml, $expected)
     {
         $method = new \ReflectionMethod(Parser::class, 'convertSgmlToXml');
@@ -136,18 +134,16 @@ HERE
         $parser->loadFromFile('a non-existent file');
     }
 
-    /**
-     * @dataProvider loadFromStringProvider
-     */
+    #[DataProvider('loadFromStringProvider')]
     public function testLoadFromFileWhenFileDoesExist($filename)
     {
         if (!file_exists($filename)) {
             self::markTestSkipped('Could not find data file, cannot test loadFromFile method fully');
         }
 
-        /** @var Parser|\PHPUnit_Framework_MockObject_MockObject $parser */
+        /** @var Parser|\PHPUnit\Framework\MockObject\MockObject $parser */
         $parser = $this->getMockBuilder(Parser::class)
-                         ->setMethods(['loadFromString'])
+                         ->onlyMethods(['loadFromString'])
                          ->getMock();
         $parser->expects(self::once())->method('loadFromString');
         $parser->loadFromFile($filename);
@@ -156,7 +152,7 @@ HERE
     /**
      * @return array
      */
-    public function loadFromStringProvider()
+    public static function loadFromStringProvider()
     {
         return [
             'ofxdata.ofx' => [dirname(__DIR__).'/fixtures/ofxdata.ofx'],
@@ -172,8 +168,8 @@ HERE
     /**
      * @param string $filename
      * @throws \Exception
-     * @dataProvider loadFromStringProvider
      */
+    #[DataProvider('loadFromStringProvider')]
     public function testLoadFromString($filename)
     {
         if (!file_exists($filename)) {

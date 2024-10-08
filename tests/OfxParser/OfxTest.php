@@ -3,18 +3,18 @@
 namespace OfxParserTest;
 
 use OfxParser\Ofx;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * @covers OfxParser\Ofx
- */
-class OfxTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(Ofx::class)]
+class OfxTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \SimpleXMLElement
      */
     protected $ofxData;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $ofxFile = dirname(__DIR__).'/fixtures/ofxdata-xml.ofx';
 
@@ -24,7 +24,7 @@ class OfxTest extends \PHPUnit_Framework_TestCase
         $this->ofxData = simplexml_load_string(file_get_contents($ofxFile));
     }
 
-    public function amountConversionProvider()
+    public static function amountConversionProvider()
     {
         return [
             '1000.00' => ['1000.00', 1000.0],
@@ -50,8 +50,8 @@ class OfxTest extends \PHPUnit_Framework_TestCase
     /**
      * @param string $input
      * @param float $output
-     * @dataProvider amountConversionProvider
      */
+    #[DataProvider('amountConversionProvider')]
     public function testCreateAmountFromStr($input, $output)
     {
         $method = new \ReflectionMethod(Ofx::class, 'createAmountFromStr');
